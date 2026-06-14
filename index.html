@@ -474,6 +474,33 @@ em { font-style: italic; }
     </p>
   </div>
 
+  <!-- THE BIGGER PICTURE ── CREAM -->
+  <div class="slide" style="background:var(--cream); color:var(--text-dark); text-align:center; gap:0;">
+    <div class="blob" style="width:420px;height:420px;background:var(--yellow2);opacity:0.3;top:-120px;right:-100px;"></div>
+    <div class="blob" style="width:260px;height:260px;background:var(--orange2);opacity:0.15;bottom:-80px;left:-60px;"></div>
+    <div class="eyebrow" style="color:var(--orange);position:relative;z-index:2;">The bigger picture</div>
+    <div class="big-quote" style="color:var(--green);margin-bottom:36px;">
+      For the first time,<br>Tran has something<br>a bank will <em style="color:var(--orange);">actually look at.</em>
+    </div>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2;">
+      <div style="background:white;border:1px solid #E8D5C0;border-radius:14px;padding:18px 22px;max-width:210px;text-align:left;">
+        <div style="font-size:22px;margin-bottom:8px;">💵</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">Cash has no trail</div>
+        <div style="font-size:12px;line-height:1.55;color:#6b7280;">No paper trail means no proof of revenue — no loan, no grant, no SBA application.</div>
+      </div>
+      <div style="background:white;border:1px solid #E8D5C0;border-radius:14px;padding:18px 22px;max-width:210px;text-align:left;">
+        <div style="font-size:22px;margin-bottom:8px;">📋</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">Every sale is now a record</div>
+        <div style="font-size:12px;line-height:1.55;color:#6b7280;">Timestamped, itemized transactions — the financial history she's never had.</div>
+      </div>
+      <div style="background:white;border:1px solid #E8D5C0;border-radius:14px;padding:18px 22px;max-width:210px;text-align:left;">
+        <div style="font-size:22px;margin-bottom:8px;">📈</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">Data that compounds</div>
+        <div style="font-size:12px;line-height:1.55;color:#6b7280;">Peak hours, top sellers, seasonal trends — better stocking decisions over time.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- 12 · ARCHITECTURE ── NAVY -->
   <div class="slide" style="background:var(--navy); color:var(--cream); gap:0; text-align:center;">
     <div class="blob" style="width:450px;height:450px;background:rgba(245,200,66,0.07);top:-150px;left:-100px;"></div>
@@ -630,7 +657,7 @@ em { font-style: italic; }
   const dotsEl   = document.getElementById('dots');
 
   // light-dot slides (dark backgrounds)
-  const lightDotSlides = new Set([1,2,3,5,6,7,8,10,12,13,15,16]);
+  const lightDotSlides = new Set([1,2,3,5,6,7,8,10,12,14,16,17]);
 
   slides.forEach((_, i) => {
     const d = document.createElement('div');
