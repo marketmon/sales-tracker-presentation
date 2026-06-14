@@ -307,7 +307,22 @@ em { font-style: italic; }
     </div>
   </div>
 
-  <!-- 6 · THE PROBLEM ── TERRACOTTA -->
+  <!-- 6 · VIDEO ── DARK GREEN -->
+  <div class="slide" style="background:#0D2219; color:var(--cream); text-align:center; gap:28px;">
+    <div class="blob" style="width:400px;height:400px;background:rgba(245,200,66,0.06);top:-120px;right:-100px;"></div>
+    <div class="eyebrow" style="color:var(--yellow); position:relative;z-index:2;">The problem, in action</div>
+    <iframe
+      width="270" height="480"
+      src="https://www.youtube.com/embed/n6SxsT3xFNg"
+      title="Tran at her produce stand"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      style="border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;z-index:2;">
+    </iframe>
+  </div>
+
+  <!-- 7 · THE PROBLEM ── TERRACOTTA -->
   <div class="slide" style="background:var(--orange); color:var(--cream); gap:0;">
     <div class="blob" style="width:500px;height:500px;background:rgba(255,255,255,0.08);top:-200px;right:-150px;"></div>
     <div class="blob" style="width:300px;height:300px;background:rgba(0,0,0,0.08);bottom:-100px;left:-80px;"></div>
@@ -565,7 +580,7 @@ em { font-style: italic; }
   const dotsEl   = document.getElementById('dots');
 
   // light-dot slides (dark backgrounds)
-  const lightDotSlides = new Set([1,2,3,5,6,7,11,13,14]);
+  const lightDotSlides = new Set([1,2,3,5,6,7,8,12,14,15]);
 
   slides.forEach((_, i) => {
     const d = document.createElement('div');
