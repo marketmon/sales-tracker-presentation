@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produce Sales Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream:     #FFF8EE;
+  --cream2:    #FFF0D6;
+  --green:     #1A4A35;
+  --green2:    #2A6147;
+  --orange:    #E8622A;
+  --orange2:   #F4845F;
+  --yellow:    #F5C842;
+  --yellow2:   #FADA6E;
+  --red:       #C0392B;
+  --teal:      #1B7A6E;
+  --navy:      #1B2B4A;
+  --brown:     #6B3D2E;
+  --text-dark: #1A1A18;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--cream);
+}
+
+/* ── SLIDE ENGINE ── */
+.deck { width: 100%; height: 100%; position: relative; }
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.55s ease;
+  padding: 64px;
+  overflow: hidden;
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+/* ── PROGRESS + NAV ── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 4px; background: var(--orange);
+  transition: width 0.4s ease; z-index: 200;
+}
+
+#dots {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 7px; z-index: 200;
+}
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(0,0,0,0.2); cursor: pointer;
+  transition: all 0.3s;
+}
+.dot.light { background: rgba(255,255,255,0.35); }
+.dot.active { transform: scale(1.5); background: var(--orange) !important; }
+
+.arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  font-size: 26px; cursor: pointer; z-index: 200;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  color: inherit; opacity: 0.5;
+  transition: opacity 0.2s, background 0.2s;
+  user-select: none;
+}
+.arrow:hover { opacity: 1; background: rgba(255,255,255,0.3); }
+#prev { left: 18px; }
+#next { right: 18px; }
+
+#counter {
+  position: fixed; top: 20px; right: 28px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+  z-index: 200; opacity: 0.5;
+}
+
+/* ── DECORATIVE BLOBS ── */
+.blob {
+  position: absolute; border-radius: 50%;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── TYPE ── */
+.eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  margin-bottom: 16px; opacity: 0.65;
+}
+
+.display {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 900; line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.headline {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(34px, 4.5vw, 62px);
+  font-weight: 700; line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(15px, 1.6vw, 20px);
+  font-weight: 400; line-height: 1.65;
+  max-width: 600px; opacity: 0.8;
+  margin-top: 20px;
+}
+
+em { font-style: italic; }
+
+/* ── PHOTO FULL-BLEED ── */
+.photo-slide {
+  background-size: cover; background-position: center;
+}
+.photo-slide .overlay {
+  position: absolute; inset: 0; z-index: 1;
+}
+.photo-slide .content {
+  position: relative; z-index: 2;
+  align-self: flex-end; width: 100%;
+  max-width: 860px; text-align: left;
+}
+
+/* ── SPLIT LAYOUT ── */
+.split {
+  flex-direction: row; gap: 72px;
+  align-items: center; text-align: left;
+}
+.split .left { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 2; }
+.split .right { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; }
+.split .right img {
+  max-height: 70vh; max-width: 100%;
+  border-radius: 16px; object-fit: cover;
+  box-shadow: 8px 12px 40px rgba(0,0,0,0.25);
+}
+
+/* ── SCREENSHOT ── */
+.ss-slide { gap: 20px; }
+.ss-slide img {
+  max-height: 62vh; max-width: 88vw;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+  position: relative; z-index: 2;
+}
+.ss-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; position: relative; z-index: 2;
+}
+
+/* ── STEP LIST ── */
+.steps { list-style: none; display: flex; flex-direction: column; gap: 14px; max-width: 540px; }
+.steps li {
+  display: flex; align-items: flex-start; gap: 14px;
+  font-size: 17px; line-height: 1.5;
+}
+.steps li .num {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; margin-top: 1px;
+}
+
+/* ── FLOW ── */
+.flow {
+  display: flex; align-items: center;
+  flex-wrap: wrap; justify-content: center;
+  gap: 0; margin: 28px 0; position: relative; z-index: 2;
+}
+.flow-box {
+  padding: 16px 20px; border-radius: 12px;
+  text-align: center; min-width: 130px;
+}
+.flow-box .f-icon { font-size: 26px; margin-bottom: 6px; }
+.flow-box .f-name { font-size: 13px; font-weight: 700; }
+.flow-box .f-sub { font-size: 11px; margin-top: 3px; opacity: 0.7; }
+.flow-arrow { font-size: 22px; margin: 0 6px; opacity: 0.6; }
+
+/* ── STAT CHIPS ── */
+.chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 24px; position: relative; z-index: 2; }
+.chip {
+  padding: 14px 24px; border-radius: 100px;
+  text-align: center;
+}
+.chip .cv { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; line-height: 1; }
+.chip .cl { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; opacity: 0.75; }
+
+/* ── BADGE GRID ── */
+.badge-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; max-width: 840px; position: relative; z-index: 2;
+}
+.badge-card {
+  border-radius: 14px; padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.badge-card .bp { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.badge-card .bn { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 700; line-height: 1.1; }
+.badge-card .bw { font-size: 12px; line-height: 1.5; opacity: 0.75; margin-top: 2px; }
+
+/* ── QUOTE ── */
+.big-quote {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(30px, 4.5vw, 58px);
+  font-weight: 700; line-height: 1.15;
+  max-width: 760px; letter-spacing: -0.01em;
+  position: relative; z-index: 2;
+}
+.big-quote em { font-style: italic; }
+
+/* ── CTA BUTTON ── */
+.cta-btn {
+  display: inline-block; margin-top: 32px;
+  padding: 16px 36px; border-radius: 100px;
+  font-size: 15px; font-weight: 600;
+  text-decoration: none; letter-spacing: 0.02em;
+  position: relative; z-index: 2;
+}
+
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="counter"></div>
+<div id="dots"></div>
+<div class="arrow" id="prev">&#8592;</div>
+<div class="arrow" id="next">&#8594;</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · TITLE ── CREAM + GREEN -->
+  <div class="slide" style="background:var(--cream); color:var(--text-dark); text-align:center;">
+    <!-- blobs -->
+    <div class="blob" style="width:420px;height:420px;background:var(--yellow2);opacity:0.35;top:-120px;right:-100px;"></div>
+    <div class="blob" style="width:280px;height:280px;background:var(--orange2);opacity:0.2;bottom:-80px;left:-60px;"></div>
+
+    <div class="eyebrow" style="color:var(--green);">Build Small Hackathon &nbsp;·&nbsp; Backyard AI Track</div>
+    <div class="display" style="color:var(--green);">Produce<br>Sales Tracker</div>
+    <div class="body" style="text-align:center; max-width:520px; color:var(--green2);">
+      A hands-free, voice-driven sales logger built for the<br>oldest outdoor produce market in America.
+    </div>
+    <div style="margin-top:40px;font-size:13px;font-weight:600;color:var(--orange);letter-spacing:0.1em;position:relative;z-index:2;">ETHAN MARKWALTER</div>
+  </div>
+
+  <!-- 2 · ROCKY HOOK ── FULL BLEED PHOTO -->
+  <div class="slide photo-slide" style="background-image:url('readme_materials/rocky italian market.png');">
+    <div class="overlay" style="background:linear-gradient(to top, rgba(10,20,10,0.88) 35%, rgba(0,0,0,0.2) 100%);"></div>
+    <div class="content" style="padding-bottom:20px;">
+      <div class="eyebrow" style="color:var(--yellow);">Philadelphia, PA</div>
+      <div class="headline" style="color:var(--cream);">You know this street<br>from <em style="color:var(--yellow);">Rocky.</em></div>
+      <p class="body" style="color:var(--cream2);">9th Street Italian Market, South Philly.</p>
+    </div>
+  </div>
+
+  <!-- 3 · MARKET HISTORY ── DEEP GREEN -->
+  <div class="slide photo-slide" style="background-image:url('readme_materials/italian market full photo.jpg');">
+    <div class="overlay" style="background:linear-gradient(to top, rgba(20,60,35,0.92) 40%, rgba(10,40,20,0.55) 100%);"></div>
+    <div class="content" style="padding-bottom:20px;">
+      <div class="eyebrow" style="color:var(--yellow);">Since 1873</div>
+      <div class="headline" style="color:var(--cream);">The oldest continuously<br>operating outdoor produce<br>market in the <em style="color:var(--yellow);">United States.</em></div>
+      <p class="body" style="color:var(--cream2);">Vendors own their stalls for generations, passing the business down from parent to child.</p>
+    </div>
+  </div>
+
+  <!-- 4 · ALL WEATHER ── FULL BLEED SNOW -->
+  <div class="slide photo-slide" style="background-image:url('readme_materials/italian market snow.jpg');">
+    <div class="overlay" style="background:linear-gradient(to top, rgba(10,10,30,0.9) 40%, rgba(0,0,0,0.3) 100%);"></div>
+    <div class="content" style="padding-bottom:20px;">
+      <div class="eyebrow" style="color:var(--orange2);">Rain. Snow. Heat. Everything.</div>
+      <div class="headline" style="color:var(--cream);">This market<br><em style="color:var(--orange2);">never closes.</em></div>
+      <p class="body" style="color:var(--cream2);">Vendors are out there in every condition — hands full, calling out prices, making change on the spot.</p>
+    </div>
+  </div>
+
+  <!-- 5 · MEET TRAN ── WARM CREAM SPLIT -->
+  <div class="slide split" style="background:var(--cream2); color:var(--text-dark);">
+    <div class="blob" style="width:350px;height:350px;background:var(--yellow2);opacity:0.4;top:-80px;left:-80px;"></div>
+    <div class="blob" style="width:220px;height:220px;background:var(--orange2);opacity:0.2;bottom:-60px;right:200px;"></div>
+    <div class="left">
+      <div class="eyebrow" style="color:var(--orange);">Meet Tran</div>
+      <div class="headline" style="color:var(--green);">40 years on<br><em>9th Street.</em></div>
+      <p class="body" style="color:var(--text-dark);">
+        Tran moved to Philadelphia after the Vietnam War and has operated her produce stand ever since.
+        Her employees serve customers in Spanish and English.
+        She runs everything in <strong>Vietnamese.</strong>
+      </p>
+    </div>
+    <div class="right">
+      <img src="../readme_materials/tran_from_trans_produce.webp" alt="Tran at her stand">
+    </div>
+  </div>
+
+  <!-- 6 · THE PROBLEM ── TERRACOTTA -->
+  <div class="slide" style="background:var(--orange); color:var(--cream); gap:0;">
+    <div class="blob" style="width:500px;height:500px;background:rgba(255,255,255,0.08);top:-200px;right:-150px;"></div>
+    <div class="blob" style="width:300px;height:300px;background:rgba(0,0,0,0.08);bottom:-100px;left:-80px;"></div>
+
+    <div class="eyebrow" style="color:var(--cream2); position:relative;z-index:2;">Every. Single. Sale.</div>
+    <div class="headline" style="color:var(--cream); margin-bottom:32px; position:relative;z-index:2;">The manual process.</div>
+    <ul class="steps" style="position:relative;z-index:2;">
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">1</span>
+        <span style="color:var(--cream);">Customer hands over a basket of produce</span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">2</span>
+        <span style="color:var(--cream);"><strong>Adds up prices in her head</strong></span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">3</span>
+        <span style="color:var(--cream);">Punches individual prices into a <strong>calculator</strong></span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">4</span>
+        <span style="color:var(--cream);">Bags items, hands them back</span>
+      </li>
+    </ul>
+    <p class="body" style="color:rgba(255,255,255,0.75); text-align:center; margin-top:32px; position:relative;z-index:2;">
+      No record. No data. No way to know what sold best last Tuesday.
+    </p>
+  </div>
+
+  <!-- 7 · THE INSIGHT ── BOLD YELLOW -->
+  <div class="slide" style="background:var(--yellow); color:var(--text-dark); text-align:center;">
+    <div class="blob" style="width:600px;height:600px;background:rgba(255,255,255,0.2);top:-200px;left:-200px;"></div>
+    <div class="big-quote" style="color:var(--green);">
+      What if tracking sales<br>was completely<br><em>hands-free?</em>
+    </div>
+  </div>
+
+  <!-- 8 · THE SOLUTION ── GREEN SPLIT -->
+  <div class="slide split" style="background:var(--green); color:var(--cream);">
+    <div class="blob" style="width:400px;height:400px;background:rgba(245,200,66,0.12);top:-100px;right:-100px;"></div>
+    <div class="left">
+      <div class="eyebrow" style="color:var(--yellow);">The Solution</div>
+      <div class="headline" style="color:var(--cream);">Speak an order.<br><em style="color:var(--yellow);">We handle the rest.</em></div>
+      <ul class="steps" style="margin-top:28px;">
+        <li>
+          <span class="num" style="background:var(--yellow);color:var(--green);">✓</span>
+          <span style="color:var(--cream2);">Transcribes speech on-device — no cloud API</span>
+        </li>
+        <li>
+          <span class="num" style="background:var(--yellow);color:var(--green);">✓</span>
+          <span style="color:var(--cream2);">Vietnamese, Spanish, and English</span>
+        </li>
+        <li>
+          <span class="num" style="background:var(--yellow);color:var(--green);">✓</span>
+          <span style="color:var(--cream2);">Parses items and maps to catalog prices</span>
+        </li>
+        <li>
+          <span class="num" style="background:var(--yellow);color:var(--green);">✓</span>
+          <span style="color:var(--cream2);">Vendor confirms before anything is logged</span>
+        </li>
+        <li>
+          <span class="num" style="background:var(--yellow);color:var(--green);">✓</span>
+          <span style="color:var(--cream2);">Dashboard: top items, revenue over time</span>
+        </li>
+      </ul>
+    </div>
+    <div class="right">
+      <img src="../readme_materials/italian market produce photo.jpeg" alt="Produce">
+    </div>
+  </div>
+
+  <!-- 9 · SCREENSHOT: RECORD ── CREAM -->
+  <div class="slide ss-slide" style="background:var(--cream); color:var(--text-dark);">
+    <div class="blob" style="width:500px;height:500px;background:var(--yellow2);opacity:0.3;top:-180px;right:-150px;"></div>
+    <div class="ss-label" style="color:var(--orange);">Step 1 — Record</div>
+    <img src="../readme_materials/screenshot_capture.png" alt="Record">
+    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
+      Select a language, tap the mic, speak the order naturally.
+    </p>
+  </div>
+
+  <!-- 10 · SCREENSHOT: CONFIRM ── LIGHT TEAL BG -->
+  <div class="slide ss-slide" style="background:#E8F5F2; color:var(--text-dark);">
+    <div class="blob" style="width:400px;height:400px;background:rgba(27,122,110,0.1);bottom:-120px;left:-100px;"></div>
+    <div class="ss-label" style="color:var(--teal);">Step 2 — Confirm</div>
+    <img src="../readme_materials/screenshot_confirm.png" alt="Confirm">
+    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
+      Review line items, adjust quantities, add anything missed — then confirm.
+    </p>
+  </div>
+
+  <!-- 11 · SCREENSHOT: DASHBOARD ── WARM ORANGE TINT -->
+  <div class="slide ss-slide" style="background:#FFF2E8; color:var(--text-dark);">
+    <div class="blob" style="width:380px;height:380px;background:rgba(232,98,42,0.1);top:-100px;right:-80px;"></div>
+    <div class="ss-label" style="color:var(--orange);">Dashboard</div>
+    <img src="../readme_materials/screenshot_dashboard.png" alt="Dashboard">
+    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
+      Every transaction logged. Top items, revenue over time, full paginated history.
+    </p>
+  </div>
+
+  <!-- 12 · ARCHITECTURE ── NAVY -->
+  <div class="slide" style="background:var(--navy); color:var(--cream); gap:0; text-align:center;">
+    <div class="blob" style="width:450px;height:450px;background:rgba(245,200,66,0.07);top:-150px;left:-100px;"></div>
+
+    <div class="eyebrow" style="color:var(--yellow); position:relative;z-index:2;">Under the Hood</div>
+    <div class="headline" style="color:var(--cream); margin-bottom:8px; position:relative;z-index:2;">2.1B parameters.<br><em style="color:var(--yellow);">Zero external APIs.</em></div>
+
+    <div class="flow" style="margin-top:28px;">
+      <div class="flow-box" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);">
+        <div class="f-icon">🎙️</div>
+        <div class="f-name" style="color:var(--cream);">Mic</div>
+        <div class="f-sub" style="color:var(--cream2);">Browser audio</div>
+      </div>
+      <div class="flow-arrow" style="color:var(--yellow);">→</div>
+      <div class="flow-box" style="background:rgba(27,122,110,0.35); border:1px solid rgba(27,122,110,0.5);">
+        <div class="f-icon">🔊</div>
+        <div class="f-name" style="color:var(--cream);">Nemotron ASR</div>
+        <div class="f-sub" style="color:var(--cream2);">nvidia · 0.6B</div>
+      </div>
+      <div class="flow-arrow" style="color:var(--yellow);">→</div>
+      <div class="flow-box" style="background:rgba(232,98,42,0.3); border:1px solid rgba(232,98,42,0.45);">
+        <div class="f-icon">🧠</div>
+        <div class="f-name" style="color:var(--cream);">Qwen 2.5</div>
+        <div class="f-sub" style="color:var(--cream2);">1.5B · parse + translate</div>
+      </div>
+      <div class="flow-arrow" style="color:var(--yellow);">→</div>
+      <div class="flow-box" style="background:rgba(245,200,66,0.18); border:1px solid rgba(245,200,66,0.35);">
+        <div class="f-icon">✅</div>
+        <div class="f-name" style="color:var(--cream);">Confirm</div>
+        <div class="f-sub" style="color:var(--cream2);">Vendor reviews</div>
+      </div>
+      <div class="flow-arrow" style="color:var(--yellow);">→</div>
+      <div class="flow-box" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);">
+        <div class="f-icon">💾</div>
+        <div class="f-name" style="color:var(--cream);">SQLite</div>
+        <div class="f-sub" style="color:var(--cream2);">Logged forever</div>
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip" style="background:rgba(245,200,66,0.18);">
+        <div class="cv" style="color:var(--yellow);">2.1B</div>
+        <div class="cl" style="color:var(--cream2);">Total Params</div>
+      </div>
+      <div class="chip" style="background:rgba(27,122,110,0.25);">
+        <div class="cv" style="color:#6EDFCE;">3</div>
+        <div class="cl" style="color:var(--cream2);">Languages</div>
+      </div>
+      <div class="chip" style="background:rgba(232,98,42,0.25);">
+        <div class="cv" style="color:var(--orange2);">~5s</div>
+        <div class="cl" style="color:var(--cream2);">Per Order</div>
+      </div>
+      <div class="chip" style="background:rgba(255,255,255,0.07);">
+        <div class="cv" style="color:var(--cream);">0</div>
+        <div class="cl" style="color:var(--cream2);">External APIs</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13 · BADGES ── CREAM WITH COLOR CARDS -->
+  <div class="slide" style="background:var(--cream); color:var(--text-dark); gap:0; text-align:center;">
+    <div class="blob" style="width:300px;height:300px;background:var(--yellow2);opacity:0.35;bottom:-80px;right:-60px;"></div>
+
+    <div class="eyebrow" style="color:var(--orange); position:relative;z-index:2;">Prizes Targeted</div>
+    <div class="headline" style="color:var(--green); margin-bottom:24px; position:relative;z-index:2;">Built to <em>stack.</em></div>
+
+    <div class="badge-grid">
+      <div class="badge-card" style="background:var(--green); color:var(--cream);">
+        <div class="bp" style="color:var(--yellow);">$1,500</div>
+        <div class="bn">Tiny Titan</div>
+        <div class="bw">2.1B total params — well under the 4B cap.</div>
+      </div>
+      <div class="badge-card" style="background:var(--orange); color:var(--cream);">
+        <div class="bp" style="color:var(--yellow);">$1,500</div>
+        <div class="bn">Off Brand</div>
+        <div class="bw">Full custom Svelte wizard: Record → Confirm → Done.</div>
+      </div>
+      <div class="badge-card" style="background:var(--yellow); color:var(--green);">
+        <div class="bp" style="color:var(--green2); opacity:0.8;">$2,000</div>
+        <div class="bn">Bonus Quest Champion</div>
+        <div class="bw">Stacking Tiny Titan + Off Brand + Nemotron + Modal.</div>
+      </div>
+      <div class="badge-card" style="background:var(--teal); color:var(--cream);">
+        <div class="bp" style="color:var(--yellow);">RTX 5080 × 2</div>
+        <div class="bn">NVIDIA Nemotron</div>
+        <div class="bw">ASR via nvidia/nemotron-3.5-asr-streaming-0.6b.</div>
+      </div>
+      <div class="badge-card" style="background:var(--navy); color:var(--cream);">
+        <div class="bp" style="color:var(--yellow);">$20,000 credits</div>
+        <div class="bn">Modal</div>
+        <div class="bw">Dev inference runs entirely on Modal GPU containers.</div>
+      </div>
+      <div class="badge-card" style="background:var(--brown); color:var(--cream);">
+        <div class="bp" style="color:var(--yellow2);">Backyard AI Track</div>
+        <div class="bn">Main Prize</div>
+        <div class="bw">Solving a real problem for a real person at a real market.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14 · WHAT'S NEXT ── RICH BURGUNDY -->
+  <div class="slide" style="background:var(--red); color:var(--cream); gap:0;">
+    <div class="blob" style="width:500px;height:500px;background:rgba(255,255,255,0.06);top:-200px;left:-150px;"></div>
+
+    <div class="eyebrow" style="color:var(--yellow2); position:relative;z-index:2;">What's Next</div>
+    <div class="headline" style="color:var(--cream); margin-bottom:32px; position:relative;z-index:2;">From stall<br>to <em style="color:var(--yellow2);">platform.</em></div>
+    <ul class="steps" style="position:relative;z-index:2;">
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">→</span>
+        <span style="color:var(--cream2);">Fine-tune Nemotron on real produce market audio</span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">→</span>
+        <span style="color:var(--cream2);">Time-series charts — which items peak at which hours</span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">→</span>
+        <span style="color:var(--cream2);">Weather API overlay to correlate sales with conditions</span>
+      </li>
+      <li>
+        <span class="num" style="background:rgba(255,255,255,0.2);color:var(--cream);">→</span>
+        <span style="color:var(--cream2);">Multi-vendor support for neighboring stalls</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 15 · CTA ── BOLD GREEN -->
+  <div class="slide" style="background:var(--green); color:var(--cream); text-align:center;">
+    <div class="blob" style="width:600px;height:600px;background:rgba(245,200,66,0.1);top:-200px;right:-200px;"></div>
+    <div class="blob" style="width:350px;height:350px;background:rgba(232,98,42,0.12);bottom:-100px;left:-80px;"></div>
+
+    <div class="eyebrow" style="color:var(--yellow); position:relative;z-index:2;">Try It Now</div>
+    <div class="display" style="color:var(--cream); font-size:clamp(36px,5.5vw,72px); position:relative;z-index:2;">
+      Built for Tran.<br>Built <em style="color:var(--yellow);">small.</em><br>Built to last.
+    </div>
+    <a class="cta-btn" href="https://huggingface.co/spaces/build-small-hackathon/voice-sales-logger" target="_blank"
+       style="background:var(--yellow);color:var(--green);">
+      View on Hugging Face →
+    </a>
+    <p style="margin-top:16px;font-size:13px;opacity:0.55;position:relative;z-index:2;">
+      huggingface.co/spaces/build-small-hackathon/voice-sales-logger
+    </p>
+  </div>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let cur = 0;
+
+  const progress = document.getElementById('progress');
+  const counter  = document.getElementById('counter');
+  const dotsEl   = document.getElementById('dots');
+
+  // light-dot slides (dark backgrounds)
+  const lightDotSlides = new Set([1,2,3,5,6,7,11,13,14]);
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(n, total - 1));
+    slides[cur].classList.add('active');
+    progress.style.width = ((cur + 1) / total * 100) + '%';
+    counter.textContent  = (cur + 1) + ' / ' + total;
+    counter.style.color  = lightDotSlides.has(cur) ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)';
+
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === cur);
+      d.style.background = i === cur
+        ? '#E8622A'
+        : lightDotSlides.has(cur) ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)';
+    });
+
+    const arrowColor = lightDotSlides.has(cur) ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)';
+    document.getElementById('prev').style.color = arrowColor;
+    document.getElementById('next').style.color = arrowColor;
+  }
+
+  document.getElementById('prev').addEventListener('click', () => goTo(cur - 1));
+  document.getElementById('next').addEventListener('click', () => goTo(cur + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(cur - 1); }
+  });
+
+  let sx = 0;
+  document.addEventListener('touchstart', e => sx = e.touches[0].clientX);
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? cur + 1 : cur - 1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>
