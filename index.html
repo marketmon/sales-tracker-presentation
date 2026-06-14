@@ -463,33 +463,14 @@ em { font-style: italic; }
     <p class="body" style="text-align:center;margin-top:24px;font-size:15px;position:relative;z-index:2;">Tran reviews, taps <strong>Confirm</strong> — and it's logged.</p>
   </div>
 
-  <!-- 9 · SCREENSHOT: RECORD ── CREAM -->
-  <div class="slide ss-slide" style="background:var(--cream); color:var(--text-dark);">
-    <div class="blob" style="width:500px;height:500px;background:var(--yellow2);opacity:0.3;top:-180px;right:-150px;"></div>
-    <div class="ss-label" style="color:var(--orange);">Step 1 — Record</div>
-    <img src="readme_materials/screenshot_capture.png" alt="Record">
-    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
-      Select a language, tap the mic, speak the order naturally.
-    </p>
-  </div>
-
-  <!-- 10 · SCREENSHOT: CONFIRM ── LIGHT TEAL BG -->
-  <div class="slide ss-slide" style="background:#E8F5F2; color:var(--text-dark);">
-    <div class="blob" style="width:400px;height:400px;background:rgba(27,122,110,0.1);bottom:-120px;left:-100px;"></div>
-    <div class="ss-label" style="color:var(--teal);">Step 2 — Confirm</div>
-    <img src="readme_materials/screenshot_confirm.png" alt="Confirm">
-    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
-      Review line items, adjust quantities, add anything missed — then confirm.
-    </p>
-  </div>
-
-  <!-- 11 · SCREENSHOT: DASHBOARD ── WARM ORANGE TINT -->
-  <div class="slide ss-slide" style="background:#FFF2E8; color:var(--text-dark);">
-    <div class="blob" style="width:380px;height:380px;background:rgba(232,98,42,0.1);top:-100px;right:-80px;"></div>
-    <div class="ss-label" style="color:var(--orange);">Dashboard</div>
-    <img src="readme_materials/screenshot_dashboard.png" alt="Dashboard">
-    <p class="body" style="font-size:15px;text-align:center;color:var(--text-dark);position:relative;z-index:2;">
-      Every transaction logged. Top items, revenue over time, full paginated history.
+  <!-- DASHBOARD ── DEEP GREEN -->
+  <div class="slide ss-slide" style="background:var(--green); color:var(--cream);">
+    <div class="blob" style="width:500px;height:500px;background:rgba(245,200,66,0.08);top:-180px;right:-150px;"></div>
+    <div class="blob" style="width:280px;height:280px;background:rgba(232,98,42,0.12);bottom:-80px;left:-60px;"></div>
+    <div class="eyebrow" style="color:var(--yellow);position:relative;z-index:2;">After the sale</div>
+    <img src="readme_materials/screenshot_dashboard.png" alt="Dashboard" style="border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.08);position:relative;z-index:2;max-height:62vh;max-width:88vw;">
+    <p class="body" style="font-size:15px;text-align:center;color:var(--cream2);position:relative;z-index:2;">
+      Every transaction logged. Top items, revenue over time — data Tran has never had before.
     </p>
   </div>
 
@@ -649,7 +630,7 @@ em { font-style: italic; }
   const dotsEl   = document.getElementById('dots');
 
   // light-dot slides (dark backgrounds)
-  const lightDotSlides = new Set([1,2,3,5,6,7,8,10,15,17,18]);
+  const lightDotSlides = new Set([1,2,3,5,6,7,8,10,12,13,15,16]);
 
   slides.forEach((_, i) => {
     const d = document.createElement('div');
